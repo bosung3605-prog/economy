@@ -12,13 +12,15 @@
   .subtitle { color: #718096; font-size: 0.85rem; margin-bottom: 20px; }
   .card { background: #fff; border-radius: 12px; padding: 18px;
            margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-  .card-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+  .card-title { font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
                  letter-spacing: .06em; color: #a0aec0; margin-bottom: 14px; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media (max-width: 480px) { .three-col { grid-template-columns: 1fr; } }
   .hero-block { padding: 12px; background: #f7fafc; border-radius: 8px; }
-  .hero-label { font-size: 0.78rem; color: #718096; margin-bottom: 4px; }
-  .hero-number { font-size: 2.2rem; font-weight: 800; line-height: 1; }
-  .hero-change { font-size: 0.82rem; margin-top: 4px; }
+  .hero-label { font-size: 0.75rem; color: #718096; margin-bottom: 4px; }
+  .hero-number { font-size: 2rem; font-weight: 800; line-height: 1; }
+  .hero-unit { font-size: 0.9rem; font-weight: 400; }
+  .hero-change { font-size: 0.8rem; margin-top: 5px; }
   .reason { font-size: 0.87rem; line-height: 1.7; color: #2d3748;
              background: #f7fafc; border-left: 3px solid #e2e8f0;
              padding: 10px 12px; border-radius: 0 6px 6px 0; margin-top: 10px; }
@@ -30,13 +32,7 @@
   .bullet-list li { font-size: 0.87rem; line-height: 1.7; color: #2d3748;
                      padding: 5px 0; border-bottom: 1px solid #f0f4f8; }
   .bullet-list li:last-child { border-bottom: none; }
-  .bullet-list li::before { content: "•"; color: #4a90d9; font-weight: 700;
-                              margin-right: 8px; }
-  .news-item { padding: 8px 0; border-bottom: 1px solid #f7fafc; }
-  .news-item:last-child { border-bottom: none; }
-  .news-source { font-size: 0.72rem; color: #a0aec0; margin-bottom: 2px; }
-  .news-title a { font-size: 0.88rem; color: #2b6cb0; text-decoration: none; line-height: 1.4; }
-  .news-title a:hover { text-decoration: underline; }
+  .bullet-list li::before { content: "•"; color: #4a90d9; font-weight: 700; margin-right: 8px; }
   .up { color: #e53e3e; }
   .down { color: #3182ce; }
   .flat { color: #718096; }
@@ -48,25 +44,23 @@
 <p class="subtitle">2026년 05월 22일 기준 · 매일 오전 7시 자동 업데이트</p>
 
 <div class="card">
-  <div class="card-title">환율 &amp; 금리</div>
-  <div class="two-col"></div>
-  <div class="divider"></div><div class="reason"><strong>환율 변동 이유</strong><br>환율에 대한 정보가 제공되지 않았기 때문에 구체적인 이유를 설명할 수 없습니다. 그러나 일반적으로 환율은 경제 지표, 수출 및 수입, 금리 등 다양한 요인에 의해 영향을 받습니다. 예를 들어, 미국 금리 결정이나 달러 강세는 환율에 영향을 줄 수 있습니다.</div><div class="reason" style="margin-top:8px;"><strong>금리 현황</strong><br>현재 금리 수준에 대한 정보가 제공되지 않았기 때문에 구체적인 이유를 설명할 수 없습니다. 그러나 일반적으로 금리는 경제 성장, 인플레이션, 고용률 등 다양한 경제 지표에 의해 결정됩니다. 연준의 최근 입장이나 경제 지표를 근거로 하여 금리 방향을 예측할 수 있습니다.</div>
+  <div class="card-title">환율 &amp; 기준금리</div>
+  <div class="three-col">
+    <div class="hero-block">
+      <div class="hero-label">달러/원 환율</div>
+      <div class="hero-number up">1,516.6<span class="hero-unit">원</span></div>
+      <div class="hero-change up">▲ 12.5원 (0.83%) 전일比</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">한국 기준금리</div>
+      <div class="hero-number flat">2.50<span class="hero-unit">%</span></div>
+      <div class="hero-change flat">— 동결 전월比</div>
+    </div></div>
+  <div class="divider"></div><div class="reason"><strong>환율 변동 이유</strong><br>환율이 오른 이유는 달러 강세와 한국의 무역 적자로 인한 원화 가치 하락 때문입니다. 달러 강세는 미국 경제의 강세와 관련된 것으로, 미국의 강한 경제 성장과 높은 금리가 달러를 강화하는 요인입니다. 또한, 한국의 무역 적자는 수출이 줄고 수입이 증가하면서 발생하는 것으로, 이는 원화 가치 하락의 원인이 됩니다.</div><div class="reason" style="margin-top:8px;"><strong>금리 현황</strong><br>미국 기준금리는 현재 데이터가 없지만, 한국 기준금리는 2.50%로 동결되었습니다. 한국의 기준금리는 최근 경제 성장 둔화와 물가 안정화 등을 고려하여 동결된 것으로 보입니다. 향후 한국은행은 물가와 경제 성장 등을 고려하여 금리 정책을 결정할 것입니다.</div>
 </div>
 
 
 
-<div class="card">
-  <div class="card-title">오늘의 한국 경제 뉴스</div>
-  <div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12055238" target="_blank">“반도체 없었으면 어쩔 뻔”…역대급 증시에 소비심리 11개월만에 최대 반등</a></div></div>
-<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054770" target="_blank">국민연금, 국내주식 보유한도 5%P 높인다</a></div></div>
-<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054730" target="_blank">10대 기업, 전체 수출서 50% 차지</a></div></div>
-<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054727" target="_blank">석유 최고가격제 4연속 동결…유류세 인하 7월말까지 연장</a></div></div>
-<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054800" target="_blank">현대차, AI로 신차 기획 혁신</a></div></div>
-<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054755" target="_blank">국민연금 기계적 매도 부담 덜듯 … 정부 "체급 커진 만큼 더 담아야"</a></div></div>
-<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054742" target="_blank">“가격 참 착하다” 젊은층 매수 몰린 동네 [n억집]</a></div></div>
-<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12055580" target="_blank">iM뱅크–김창준 한미연구원, 지역기업 미국 진출 지원 업무협약</a></div></div>
-</div>
-
-<p class="footer">데이터: Yahoo Finance · FRED · 한국경제 · 매일경제 · 연합뉴스 | AI: Groq (Llama 3.3)</p>
+<p class="footer">데이터: Yahoo Finance(Twelve Data) · FRED · 한국은행(ECOS) | AI: Groq (Llama 3.3)</p>
 </body>
 </html>
