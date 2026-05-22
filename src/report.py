@@ -28,14 +28,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
              background: #f7fafc; border-left: 3px solid #e2e8f0;
              padding: 10px 12px; border-radius: 0 6px 6px 0; margin-top: 10px; }}
   .divider {{ height: 1px; background: #e2e8f0; margin: 14px 0; }}
-  .big-metric {{ display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }}
+  .big-metric {{ display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }}
   .big-value {{ font-size: 1.9rem; font-weight: 800; }}
   .big-change {{ font-size: 0.85rem; }}
-  .bullet-list {{ margin-top: 10px; padding-left: 0; list-style: none; }}
+  .sub-title {{ font-size: 0.82rem; font-weight: 700; color: #4a5568;
+                margin: 14px 0 6px; padding-bottom: 4px;
+                border-bottom: 1px solid #e2e8f0; }}
+  .bullet-list {{ padding-left: 0; list-style: none; margin-bottom: 4px; }}
   .bullet-list li {{ font-size: 0.87rem; line-height: 1.7; color: #2d3748;
-                     padding: 5px 0; border-bottom: 1px solid #f0f4f8; }}
+                     padding: 4px 0; border-bottom: 1px solid #f7fafc; }}
   .bullet-list li:last-child {{ border-bottom: none; }}
   .bullet-list li::before {{ content: "•"; color: #4a90d9; font-weight: 700; margin-right: 8px; }}
+  .bullet-pos li::before {{ content: "•"; color: #38a169; }}
+  .bullet-neg li::before {{ content: "•"; color: #e53e3e; }}
   .up {{ color: #e53e3e; }}
   .down {{ color: #3182ce; }}
   .flat {{ color: #718096; }}
@@ -50,7 +55,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 {nasdaq_html}
 {kospi_html}
 
-<p class="footer">데이터: Yahoo Finance(Twelve Data) · FRED · 한국은행(ECOS) | AI: Groq (Llama 3.3)</p>
+<p class="footer">데이터: Twelve Data · FRED · 한국은행(ECOS) | AI: Groq (Llama 3.3)</p>
 </body>
 </html>"""
 
@@ -84,24 +89,52 @@ def _extract_section(text: str, tag: str) -> str:
     return m.group(1).strip() if m else ""
 
 
-def _bullets_to_html(text: str) -> str:
+def _bullets_to_html(text: str, css_class: str = "bullet-list") -> str:
     lines = [l.strip().lstrip("•·-").strip() for l in text.splitlines() if l.strip()]
-    return "".join(f"<li>{l}</li>" for l in lines if l)
+    items = "".join(f"<li>{l}</li>" for l in lines if l)
+    return f'<ul class="{css_class}">{items}</ul>' if items else ""
+
+
+def _company_bullets_to_html(text: str) -> str:
+    """긍정:/부정: 접두어를 파싱해 색상 분리 렌더링."""
+    pos_lines, neg_lines = [], []
+    for line in text.splitlines():
+        line = line.strip().lstrip("•·-").strip()
+        if not line:
+            continue
+        if line.startswith("긍정"):
+            pos_lines.append(re.sub(r"^긍정[:\s]*", "", line).strip())
+        elif line.startswith("부정"):
+            neg_lines.append(re.sub(r"^부정[:\s]*", "", line).strip())
+        else:
+            pos_lines.append(line)
+
+    html = ""
+    if pos_lines:
+        items = "".join(f"<li>{l}</li>" for l in pos_lines)
+        html += f'<div class="sub-title">긍정적 전망</div><ul class="bullet-list bullet-pos">{items}</ul>'
+    if neg_lines:
+        items = "".join(f"<li>{l}</li>" for l in neg_lines)
+        html += f'<div class="sub-title">부정적 전망</div><ul class="bullet-list bullet-neg">{items}</ul>'
+    return html
 
 
 def parse_analysis(raw: str) -> dict:
     return {
-        "usdkrw_reason": _extract_section(raw, "환율이유"),
-        "rate_reason": _extract_section(raw, "금리이유"),
-        "nasdaq_bullets": _extract_section(raw, "나스닥분석"),
-        "korea_bullets": _extract_section(raw, "한국경제"),
+        "usdkrw_reason":  _extract_section(raw, "환율이유"),
+        "rate_reason":    _extract_section(raw, "금리이유"),
+        "nasdaq_sector":  _extract_section(raw, "나스닥섹터"),
+        "nasdaq_company": _extract_section(raw, "나스닥기업"),
+        "nasdaq_outlook": _extract_section(raw, "나스닥전망"),
+        "kospi_sector":   _extract_section(raw, "코스피섹터"),
+        "kospi_company":  _extract_section(raw, "코스피기업"),
+        "korea_outlook":  _extract_section(raw, "한국전망"),
     }
 
 
 def build_hero_html(market: dict, rate: dict | None, kor_rate: dict | None, analysis: dict) -> str:
     fx = market.get("usdkrw")
 
-    # 환율 블록
     fx_html = ""
     if fx:
         cls = _css(fx["change"])
@@ -112,7 +145,6 @@ def build_hero_html(market: dict, rate: dict | None, kor_rate: dict | None, anal
       <div class="hero-change {cls}">{_arrow(fx['change'])} {abs(fx['change']):.1f}원 ({abs(fx['change_pct']):.2f}%) 전일比</div>
     </div>"""
 
-    # 미국 기준금리 블록
     us_rate_html = ""
     if rate:
         rate_cls = _css(rate.get("change", 0))
@@ -123,7 +155,6 @@ def build_hero_html(market: dict, rate: dict | None, kor_rate: dict | None, anal
       <div class="hero-change {rate_cls}">{_rate_change_label(rate.get('change', 0))} 전월比</div>
     </div>"""
 
-    # 한국 기준금리 블록
     kor_rate_html = ""
     if kor_rate:
         kor_cls = _css(kor_rate.get("change", 0))
@@ -134,18 +165,17 @@ def build_hero_html(market: dict, rate: dict | None, kor_rate: dict | None, anal
       <div class="hero-change {kor_cls}">{_rate_change_label(kor_rate.get('change', 0))} 전월比</div>
     </div>"""
 
-    # 이유 섹션
     reason_parts = []
-    usdkrw_reason = analysis.get("usdkrw_reason", "")
-    rate_reason = analysis.get("rate_reason", "")
-    if usdkrw_reason:
-        reason_parts.append(f'<div class="reason"><strong>환율 변동 이유</strong><br>{usdkrw_reason}</div>')
-    if rate_reason:
-        reason_parts.append(f'<div class="reason" style="margin-top:8px;"><strong>금리 현황</strong><br>{rate_reason}</div>')
+    if analysis.get("usdkrw_reason"):
+        reason_parts.append(
+            f'<div class="reason"><strong>환율 변동 이유</strong><br>{analysis["usdkrw_reason"]}</div>'
+        )
+    if analysis.get("rate_reason"):
+        reason_parts.append(
+            f'<div class="reason" style="margin-top:8px;"><strong>금리 현황</strong><br>{analysis["rate_reason"]}</div>'
+        )
 
-    reason_html = ""
-    if reason_parts:
-        reason_html = '<div class="divider"></div>' + "".join(reason_parts)
+    reason_html = ('<div class="divider"></div>' + "".join(reason_parts)) if reason_parts else ""
 
     return f"""<div class="card">
   <div class="card-title">환율 &amp; 기준금리</div>
@@ -159,15 +189,28 @@ def build_nasdaq_html(market: dict, analysis: dict) -> str:
     if not n:
         return ""
     cls = _css(n["change_pct"])
-    bullets = _bullets_to_html(analysis.get("nasdaq_bullets", ""))
-    bullets_block = f'<ul class="bullet-list">{bullets}</ul>' if bullets else ""
+
+    sector_html = ""
+    if analysis.get("nasdaq_sector"):
+        sector_html = f'<div class="sub-title">📊 주도 섹터</div>{_bullets_to_html(analysis["nasdaq_sector"])}'
+
+    company_html = ""
+    if analysis.get("nasdaq_company"):
+        company_html = f'<div class="sub-title">🏢 주요 기업</div>{_company_bullets_to_html(analysis["nasdaq_company"])}'
+
+    outlook_html = ""
+    if analysis.get("nasdaq_outlook"):
+        outlook_html = f'<div class="sub-title">🔭 전망 &amp; 정치</div>{_bullets_to_html(analysis["nasdaq_outlook"])}'
+
     return f"""<div class="card">
   <div class="card-title">나스닥</div>
   <div class="big-metric">
     <span class="big-value {cls}">{n['value']:,.2f}</span>
     <span class="big-change {cls}">{_arrow(n['change_pct'])} {abs(n['change_pct']):.2f}% ({_arrow(n['change'])}{abs(n['change']):.2f}p)</span>
   </div>
-  {bullets_block}
+  {sector_html}
+  {company_html}
+  {outlook_html}
 </div>"""
 
 
@@ -176,15 +219,28 @@ def build_kospi_html(market: dict, analysis: dict) -> str:
     if not k:
         return ""
     cls = _css(k["change_pct"])
-    bullets = _bullets_to_html(analysis.get("korea_bullets", ""))
-    bullets_block = f'<ul class="bullet-list">{bullets}</ul>' if bullets else ""
+
+    sector_html = ""
+    if analysis.get("kospi_sector"):
+        sector_html = f'<div class="sub-title">📊 주도 섹터</div>{_bullets_to_html(analysis["kospi_sector"])}'
+
+    company_html = ""
+    if analysis.get("kospi_company"):
+        company_html = f'<div class="sub-title">🏢 주요 기업</div>{_company_bullets_to_html(analysis["kospi_company"])}'
+
+    outlook_html = ""
+    if analysis.get("korea_outlook"):
+        outlook_html = f'<div class="sub-title">🔭 전망 &amp; 정치</div>{_bullets_to_html(analysis["korea_outlook"])}'
+
     return f"""<div class="card">
   <div class="card-title">코스피 &amp; 한국 경제</div>
   <div class="big-metric">
     <span class="big-value {cls}">{k['value']:,.2f}</span>
     <span class="big-change {cls}">{_arrow(k['change_pct'])} {abs(k['change_pct']):.2f}% ({_arrow(k['change'])}{abs(k['change']):.2f}p)</span>
   </div>
-  {bullets_block}
+  {sector_html}
+  {company_html}
+  {outlook_html}
 </div>"""
 
 
@@ -212,7 +268,7 @@ def build_analysis(market: dict, rate: dict | None, kor_rate: dict | None, groq_
     if kor_rate:
         kor_rate_info = f"{kor_rate['value']:.2f}% ({_rate_change_label(kor_rate.get('change', 0))}, {kor_rate['date']} 기준)"
 
-    prompt = f"""당신은 10년 경력의 한국 금융 애널리스트입니다. 아래 지표를 바탕으로 전문적이고 구체적인 분석을 작성하세요.
+    prompt = f"""당신은 10년 경력의 한국 금융 애널리스트입니다. 아래 지표를 바탕으로 심층 분석을 작성하세요.
 
 [오늘의 지표]
 - 달러/원 환율: {fx_info}
@@ -221,54 +277,67 @@ def build_analysis(market: dict, rate: dict | None, kor_rate: dict | None, groq_
 - 나스닥: {nasdaq_info}
 - 코스피: {kospi_info}
 
-아래 4개 섹션을 정확히 이 형식으로 작성하세요. 태그는 반드시 유지하세요.
+아래 8개 섹션을 정확히 이 형식으로 작성하세요. 태그는 반드시 유지하세요. 모호한 표현 금지.
 
 [환율이유]
-달러/원 환율 변동의 구체적 원인을 2~3문장으로 서술하세요.
-- 미국 달러 강약 원인(예: 연준 통화정책 기조, 미국 경제지표), 한국 원화 수급(예: 수출입 동향, 외국인 자금 흐름)을 연결해서 설명하세요.
-- "변동성이 있다", "불확실하다" 같은 표현 금지. 반드시 구체적 원인을 명시하세요.
+달러/원 환율 변동의 구체적 원인을 2~3문장으로 서술. 미국 달러 강약 원인(연준 기조, 경제지표)과 원화 수급(외국인 자금흐름, 수출입)을 연결해 설명.
 [/환율이유]
 
 [금리이유]
-미국·한국 기준금리를 각각 1~2문장씩 분석하세요.
-- 미국: 현재 금리 수준의 배경(인플레이션 진행 상황, 연준 목표), 동결/인하/인상 기조와 이유
-- 한국: 한국은행의 현재 금리 결정 배경, 미국 금리와의 격차가 원화·자본흐름에 미치는 영향
+미국 기준금리: 현재 수준 배경, 인플레이션 진행 상황, 연준 향후 방향 1~2문장.
+한국 기준금리: 한국은행 결정 배경, 미·한 금리 격차가 원화와 자본흐름에 미치는 영향 1~2문장.
 [/금리이유]
 
-[나스닥분석]
-나스닥 변동을 5개 bullet point로 분석하세요. 각 줄은 반드시 • 로 시작하세요.
-- 어떤 섹터(빅테크·AI·반도체·바이오 등)가 지수를 주도했는지
-- 연준 금리 정책이 기술주 밸류에이션에 미치는 영향
-- 미국 기업 실적 시즌 흐름 또는 매크로 지표(고용·CPI·GDP) 영향
-- 나스닥 흐름이 국내 반도체·IT 수출 기업에 미치는 영향
-- 외국인 투자자 코스닥/코스피 수급에 대한 시사점
-[/나스닥분석]
+[나스닥섹터]
+나스닥을 주도하는 섹터 3~4개를 bullet point로 작성. 각 줄은 • 로 시작. 섹터명과 주도 이유를 반드시 명시(예: AI/반도체 섹터 — 엔비디아 실적 상향으로 ...).
+[/나스닥섹터]
 
-[한국경제]
-코스피 흐름과 한국 경제 현황을 5개 bullet point로 분석하세요. 각 줄은 반드시 • 로 시작하세요.
-- 코스피 등락의 주요 원인(외국인·기관 수급, 업종별 흐름)
-- 반도체·배터리·자동차 등 주요 수출 업종 현황
-- 원달러 환율 수준이 수출 기업 실적에 미치는 영향
-- 한국 내수 경기 지표(소비·투자·물가) 현황
-- 단기 코스피 방향성 및 주목할 리스크 요인
-[/한국경제]
+[나스닥기업]
+나스닥 주요 기업의 전망을 bullet point로 작성. 각 줄은 반드시 "긍정:" 또는 "부정:" 으로 시작하고, 기업명과 구체적 이유를 명시. 긍정 3개, 부정 2~3개.
+예시:
+긍정: 엔비디아 — 데이터센터 수요 급증으로 2분기 실적 대폭 상향 전망
+부정: 애플 — 중국 스마트폰 시장 점유율 하락, 화웨이와의 경쟁 심화
+[/나스닥기업]
 
-모든 내용은 한국어로 작성하세요. 각 bullet point는 한 문장으로 완결되게 작성하세요."""
+[나스닥전망]
+나스닥 향후 3~6개월 방향성과 정부·정치적 영향을 bullet point 3~4개로 작성. 각 줄은 • 로 시작.
+- 연준 통화정책 방향이 기술주에 미치는 영향
+- 미국 정부의 빅테크 규제, 반도체 수출통제, 무역정책이 나스닥에 미치는 영향
+- 주목해야 할 리스크 또는 기회 요인
+[/나스닥전망]
+
+[코스피섹터]
+코스피를 주도하는 섹터 3~4개를 bullet point로 작성. 각 줄은 • 로 시작. 섹터명과 주도 이유 반드시 명시(예: 반도체 섹터 — 삼성전자·SK하이닉스 HBM 수요 호조로 ...).
+[/코스피섹터]
+
+[코스피기업]
+코스피 주요 기업의 전망을 bullet point로 작성. 각 줄은 반드시 "긍정:" 또는 "부정:" 으로 시작. 기업명 반드시 명시. 긍정 3개, 부정 2~3개.
+예시:
+긍정: 삼성전자 — HBM3E 공급 계약 확대로 반도체 부문 실적 회복 기대
+부정: LG에너지솔루션 — 전기차 수요 둔화로 배터리 출하량 감소 우려
+[/코스피기업]
+
+[한국전망]
+코스피 향후 3~6개월 방향성과 한국 정부·정치적 영향을 bullet point 3~4개로 작성. 각 줄은 • 로 시작.
+- 한국 정부 산업정책(반도체 지원, 수출 규제 대응, 재정정책)이 코스피에 미치는 영향
+- 외국인 투자자 수급 전망 및 원화 환율 영향
+- 주목해야 할 리스크 또는 기회 요인
+[/한국전망]
+
+모든 내용은 한국어로 작성하세요. 기업명·섹터명은 반드시 구체적으로 명시하세요."""
 
     try:
         client = Groq(api_key=groq_api_key)
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=1800,
+            max_tokens=2800,
             temperature=0.25,
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        return (
-            f"[환율이유]AI 해설을 불러오지 못했습니다. ({e})[/환율이유]"
-            "[금리이유][/금리이유][나스닥분석][/나스닥분석][한국경제][/한국경제]"
-        )
+        empty = "[/환율이유][금리이유][/금리이유][나스닥섹터][/나스닥섹터][나스닥기업][/나스닥기업][나스닥전망][/나스닥전망][코스피섹터][/코스피섹터][코스피기업][/코스피기업][한국전망][/한국전망]"
+        return f"[환율이유]AI 해설 오류: {e}{empty}"
 
 
 def build_telegram_message(date: str, market: dict, rate: dict | None, kor_rate: dict | None, analysis: dict) -> str:
@@ -278,42 +347,39 @@ def build_telegram_message(date: str, market: dict, rate: dict | None, kor_rate:
         fx = market["usdkrw"]
         arrow = "🔴" if fx["change"] > 0 else "🟢"
         lines.append(f"{arrow} *달러/원*: {fx['value']:,.1f}원 ({_arrow(fx['change'])}{abs(fx['change']):.1f}원)")
-
     if rate:
-        lines.append(f"🏦 *미국 기준금리*: {rate['value']:.2f}% ({_rate_change_label(rate.get('change', 0))})")
-
+        lines.append(f"🏦 *미국 금리*: {rate['value']:.2f}% ({_rate_change_label(rate.get('change', 0))})")
     if kor_rate:
-        lines.append(f"🏦 *한국 기준금리*: {kor_rate['value']:.2f}% ({_rate_change_label(kor_rate.get('change', 0))})")
-
+        lines.append(f"🏦 *한국 금리*: {kor_rate['value']:.2f}% ({_rate_change_label(kor_rate.get('change', 0))})")
     if market.get("nasdaq"):
         n = market["nasdaq"]
         arrow = "🔴" if n["change_pct"] < 0 else "🟢"
         lines.append(f"{arrow} *나스닥*: {n['value']:,.2f}p ({_arrow(n['change_pct'])}{abs(n['change_pct']):.2f}%)")
-
     if market.get("kospi"):
         k = market["kospi"]
         arrow = "🔴" if k["change_pct"] < 0 else "🟢"
         lines.append(f"{arrow} *코스피*: {k['value']:,.2f}p ({_arrow(k['change_pct'])}{abs(k['change_pct']):.2f}%)")
 
-    usdkrw_reason = analysis.get("usdkrw_reason", "")
-    if usdkrw_reason:
-        lines.append(f"\n💱 *환율 변동 이유*\n{usdkrw_reason[:300]}")
+    if analysis.get("usdkrw_reason"):
+        lines.append(f"\n💱 *환율*\n{analysis['usdkrw_reason'][:250]}")
+    if analysis.get("rate_reason"):
+        lines.append(f"\n🏦 *금리*\n{analysis['rate_reason'][:250]}")
 
-    rate_reason = analysis.get("rate_reason", "")
-    if rate_reason:
-        lines.append(f"\n🏦 *금리 현황*\n{rate_reason[:300]}")
+    if analysis.get("nasdaq_sector"):
+        bullets = [l.strip() for l in analysis["nasdaq_sector"].splitlines() if l.strip()][:3]
+        lines.append("\n📈 *나스닥 주도 섹터*\n" + "\n".join(bullets))
 
-    nasdaq_bullets = analysis.get("nasdaq_bullets", "")
-    if nasdaq_bullets:
-        bullet_lines = [l.strip() for l in nasdaq_bullets.splitlines() if l.strip()][:3]
-        lines.append("\n📈 *나스닥 분석*")
-        lines.extend(bullet_lines)
+    if analysis.get("nasdaq_outlook"):
+        bullets = [l.strip() for l in analysis["nasdaq_outlook"].splitlines() if l.strip()][:2]
+        lines.append("\n🔭 *나스닥 전망*\n" + "\n".join(bullets))
 
-    korea_bullets = analysis.get("korea_bullets", "")
-    if korea_bullets:
-        bullet_lines = [l.strip() for l in korea_bullets.splitlines() if l.strip()][:3]
-        lines.append("\n🇰🇷 *한국 경제*")
-        lines.extend(bullet_lines)
+    if analysis.get("kospi_sector"):
+        bullets = [l.strip() for l in analysis["kospi_sector"].splitlines() if l.strip()][:3]
+        lines.append("\n📉 *코스피 주도 섹터*\n" + "\n".join(bullets))
+
+    if analysis.get("korea_outlook"):
+        bullets = [l.strip() for l in analysis["korea_outlook"].splitlines() if l.strip()][:2]
+        lines.append("\n🇰🇷 *한국 전망*\n" + "\n".join(bullets))
 
     return "\n".join(lines)
 
