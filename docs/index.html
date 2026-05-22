@@ -25,14 +25,19 @@
              background: #f7fafc; border-left: 3px solid #e2e8f0;
              padding: 10px 12px; border-radius: 0 6px 6px 0; margin-top: 10px; }
   .divider { height: 1px; background: #e2e8f0; margin: 14px 0; }
-  .big-metric { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .big-metric { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
   .big-value { font-size: 1.9rem; font-weight: 800; }
   .big-change { font-size: 0.85rem; }
-  .bullet-list { margin-top: 10px; padding-left: 0; list-style: none; }
+  .sub-title { font-size: 0.82rem; font-weight: 700; color: #4a5568;
+                margin: 14px 0 6px; padding-bottom: 4px;
+                border-bottom: 1px solid #e2e8f0; }
+  .bullet-list { padding-left: 0; list-style: none; margin-bottom: 4px; }
   .bullet-list li { font-size: 0.87rem; line-height: 1.7; color: #2d3748;
-                     padding: 5px 0; border-bottom: 1px solid #f0f4f8; }
+                     padding: 4px 0; border-bottom: 1px solid #f7fafc; }
   .bullet-list li:last-child { border-bottom: none; }
   .bullet-list li::before { content: "•"; color: #4a90d9; font-weight: 700; margin-right: 8px; }
+  .bullet-pos li::before { content: "•"; color: #38a169; }
+  .bullet-neg li::before { content: "•"; color: #e53e3e; }
   .up { color: #e53e3e; }
   .down { color: #3182ce; }
   .flat { color: #718096; }
@@ -48,19 +53,19 @@
   <div class="three-col">
     <div class="hero-block">
       <div class="hero-label">달러/원 환율</div>
-      <div class="hero-number up">1,516.6<span class="hero-unit">원</span></div>
-      <div class="hero-change up">▲ 12.5원 (0.83%) 전일比</div>
+      <div class="hero-number up">1,517.1<span class="hero-unit">원</span></div>
+      <div class="hero-change up">▲ 13.0원 (0.86%) 전일比</div>
     </div>
     <div class="hero-block">
       <div class="hero-label">한국 기준금리</div>
       <div class="hero-number flat">2.50<span class="hero-unit">%</span></div>
       <div class="hero-change flat">— 동결 전월比</div>
     </div></div>
-  <div class="divider"></div><div class="reason"><strong>환율 변동 이유</strong><br>환율이 오른 이유는 달러 강세와 한국의 무역 적자로 인한 원화 가치 하락 때문입니다. 달러 강세는 미국 경제의 강세와 관련된 것으로, 미국의 강한 경제 성장과 높은 금리가 달러를 강화하는 요인입니다. 또한, 한국의 무역 적자는 수출이 줄고 수입이 증가하면서 발생하는 것으로, 이는 원화 가치 하락의 원인이 됩니다.</div><div class="reason" style="margin-top:8px;"><strong>금리 현황</strong><br>미국 기준금리는 현재 데이터가 없지만, 한국 기준금리는 2.50%로 동결되었습니다. 한국의 기준금리는 최근 경제 성장 둔화와 물가 안정화 등을 고려하여 동결된 것으로 보입니다. 향후 한국은행은 물가와 경제 성장 등을 고려하여 금리 정책을 결정할 것입니다.</div>
+  <div class="divider"></div><div class="reason"><strong>환율 변동 이유</strong><br>달러/원 환율은 1달러 = 1,517.1원으로 상승하였으며, 이는 미국 달러의 강세와 원화의 약세로 인한 결과입니다. 미국의 경제 지표가 호조를 보이고, 연준의 금리 인상 기조가 유지되면서 미국 달러가 강세를 보이고 있습니다. 또한, 외국인 자금의 유출과 수출입 불균형으로 인한 원화 수급 감소가 원화 약세를 가중시키고 있습니다.</div><div class="reason" style="margin-top:8px;"><strong>금리 현황</strong><br>미국 기준금리는 현재 수준을 유지하고 있으며, 이는 미국의 인플레이션 진행 상황과 연준의 향후 방향에 따라 결정될 것입니다. 한국 기준금리는 2.50%로 동결되었으며, 이는 한국은행의 결정 배경과 미·한 금리 격차가 원화와 자본흐름에 미치는 영향에 따라 결정되었습니다. 미·한 금리 격차는 원화 약세를 가중시키고 있습니다.</div>
 </div>
 
 
 
-<p class="footer">데이터: Yahoo Finance(Twelve Data) · FRED · 한국은행(ECOS) | AI: Groq (Llama 3.3)</p>
+<p class="footer">데이터: Twelve Data · FRED · 한국은행(ECOS) | AI: Groq (Llama 3.3)</p>
 </body>
 </html>
