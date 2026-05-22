@@ -52,6 +52,8 @@ def main() -> None:
     print("한국 경제 뉴스 수집 중...")
     news_items = fetch_news(max_items=8)
 
+    print(f"[데이터 확인] market={market}, rate={rate}, news={len(news_items)}건")
+
     print("AI 해설 생성 중...")
     if groq_api_key:
         raw_analysis = build_analysis(market, rate, news_items, groq_api_key)
