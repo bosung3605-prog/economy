@@ -66,6 +66,33 @@ def fetch_interest_rate() -> dict | None:
         return None
 
 
+NEWS_FEEDS_KR = [
+    ("한국경제", "https://www.hankyung.com/feed/economy"),
+    ("매일경제", "https://www.mk.co.kr/rss/30100041/"),
+    ("연합뉴스 경제", "https://www.yna.co.kr/economy/rss.xml"),
+]
+NEWS_FEEDS_US = [
+    ("Reuters", "https://feeds.reuters.com/reuters/businessNews"),
+    ("BBC Business", "https://feeds.bbci.co.uk/news/business/rss.xml"),
+]
+
+
+def fetch_news(max_items: int = 10) -> list[dict]:
+    import feedparser
+    items = []
+    for source_name, url in NEWS_FEEDS_KR + NEWS_FEEDS_US:
+        try:
+            feed = feedparser.parse(url)
+            for entry in feed.entries[:10]:
+                title = entry.get("title", "").strip()
+                if title:
+                    items.append({"source": source_name, "title": title})
+        except Exception as e:
+            print(f"[경고] {source_name} 뉴스 수집 실패: {e}")
+    print(f"[OK] 뉴스 헤드라인 {len(items)}건 수집")
+    return items[:max_items]
+
+
 def fetch_kor_rate(api_key: str) -> dict | None:
     if not api_key:
         print("[경고] 한국 기준금리: BOK_API_KEY 미설정")

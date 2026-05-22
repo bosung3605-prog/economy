@@ -4,7 +4,7 @@ import requests
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-from fetchers import fetch_market_data, fetch_interest_rate, fetch_kor_rate
+from fetchers import fetch_market_data, fetch_interest_rate, fetch_kor_rate, fetch_news
 from report import (
     build_analysis,
     parse_analysis,
@@ -53,11 +53,14 @@ def main() -> None:
     print("한국 기준금리 수집 중 (ECOS)...")
     kor_rate = fetch_kor_rate(bok_api_key)
 
+    print("뉴스 헤드라인 수집 중 (AI 프롬프트용)...")
+    news_items = fetch_news(max_items=10)
+
     print(f"[데이터 확인] market={market}, rate={rate}, kor_rate={kor_rate}")
 
     print("AI 해설 생성 중...")
     if groq_api_key:
-        raw_analysis = build_analysis(market, rate, kor_rate, groq_api_key)
+        raw_analysis = build_analysis(market, rate, kor_rate, news_items, groq_api_key)
         analysis = parse_analysis(raw_analysis)
     else:
         print("GROQ_API_KEY 미설정 — AI 해설 생략")
