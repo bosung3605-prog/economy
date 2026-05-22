@@ -6,9 +6,12 @@ from pathlib import Path
 
 from fetchers import fetch_market_data, fetch_interest_rate, fetch_news
 from report import (
-    build_metrics_html,
-    build_news_html,
     build_analysis,
+    parse_analysis,
+    build_hero_html,
+    build_nasdaq_html,
+    build_kospi_html,
+    build_news_html,
     build_telegram_message,
     render_html,
 )
@@ -46,18 +49,22 @@ def main() -> None:
     print("기준금리 수집 중...")
     rate = fetch_interest_rate()
 
-    print("경제 뉴스 수집 중...")
+    print("한국 경제 뉴스 수집 중...")
     news_items = fetch_news(max_items=8)
 
     print("AI 해설 생성 중...")
     if groq_api_key:
-        analysis = build_analysis(market, rate, news_items, groq_api_key)
+        raw_analysis = build_analysis(market, rate, news_items, groq_api_key)
+        analysis = parse_analysis(raw_analysis)
     else:
-        analysis = "GROQ_API_KEY 환경 변수가 설정되지 않아 AI 해설을 생성하지 못했습니다."
+        print("GROQ_API_KEY 미설정 — AI 해설 생략")
+        analysis = {"usdkrw_reason": "", "rate_reason": "", "nasdaq_bullets": "", "korea_bullets": ""}
 
-    metrics_html = build_metrics_html(market, rate)
+    hero_html = build_hero_html(market, rate, analysis)
+    nasdaq_html = build_nasdaq_html(market, analysis)
+    kospi_html = build_kospi_html(market, analysis)
     news_html = build_news_html(news_items)
-    html = render_html(today, metrics_html, news_html, analysis)
+    html = render_html(today, hero_html, nasdaq_html, kospi_html, news_html)
 
     DOCS_DIR.mkdir(exist_ok=True)
     html_path = DOCS_DIR / "index.html"

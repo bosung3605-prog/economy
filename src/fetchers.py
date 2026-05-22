@@ -1,25 +1,30 @@
 import requests
 import feedparser
 import yfinance as yf
-from datetime import datetime, timedelta
 import io
 import csv
 
 NASDAQ_TICKER = "^IXIC"
 USD_KRW_TICKER = "USDKRW=X"
+KOSPI_TICKER = "^KS11"
 FRED_FEDFUNDS_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=FEDFUNDS"
 
 NEWS_FEEDS = [
-    ("Reuters Business", "https://feeds.reuters.com/reuters/businessNews"),
-    ("BBC Business", "https://feeds.bbci.co.uk/news/business/rss.xml"),
+    ("한국경제", "https://www.hankyung.com/feed/economy"),
+    ("매일경제", "https://www.mk.co.kr/rss/30100041/"),
+    ("연합뉴스 경제", "https://www.yna.co.kr/economy/rss.xml"),
 ]
 
-# 환율/금리/나스닥에 영향 주는 키워드 우선 필터
 PRIORITY_KEYWORDS = [
-    "fed", "federal reserve", "rate", "interest", "inflation", "nasdaq",
-    "dollar", "currency", "exchange", "gdp", "recession", "jobs", "employment",
-    "cpi", "tariff", "trade", "earnings", "powell", "fomc", "treasury",
-    "금리", "환율", "연준", "인플레이션", "나스닥", "달러",
+    # 한국 경제
+    "코스피", "원달러", "환율", "한국은행", "기준금리", "수출", "수입", "무역",
+    "반도체", "삼성", "현대", "sk", "lg", "포스코", "gdp", "성장률",
+    "인플레이션", "물가", "소비자물가", "고용", "실업", "부동산", "금리",
+    "달러", "외환", "경상수지", "재정", "세금", "예산",
+    # 미국·글로벌 (나스닥·금리 영향)
+    "fed", "federal reserve", "rate", "interest", "nasdaq", "dollar",
+    "inflation", "gdp", "recession", "jobs", "cpi", "tariff", "trade",
+    "powell", "fomc", "treasury", "earnings",
 ]
 
 
@@ -28,44 +33,29 @@ def _score_news(title: str, summary: str) -> int:
     return sum(1 for kw in PRIORITY_KEYWORDS if kw in text)
 
 
+def _fetch_ticker(ticker: str, period: str = "7d") -> dict | None:
+    t = yf.Ticker(ticker)
+    hist = t.history(period=period)
+    if len(hist) < 2:
+        return None
+    today_close = hist["Close"].iloc[-1]
+    prev_close = hist["Close"].iloc[-2]
+    change = today_close - prev_close
+    change_pct = (change / prev_close) * 100
+    return {
+        "value": round(today_close, 2),
+        "change": round(change, 2),
+        "change_pct": round(change_pct, 2),
+        "date": hist.index[-1].strftime("%Y-%m-%d"),
+    }
+
+
 def fetch_market_data() -> dict:
-    result = {}
-
-    # 나스닥
-    nasdaq = yf.Ticker(NASDAQ_TICKER)
-    hist = nasdaq.history(period="5d")
-    if len(hist) >= 2:
-        today_close = hist["Close"].iloc[-1]
-        prev_close = hist["Close"].iloc[-2]
-        change = today_close - prev_close
-        change_pct = (change / prev_close) * 100
-        result["nasdaq"] = {
-            "value": round(today_close, 2),
-            "change": round(change, 2),
-            "change_pct": round(change_pct, 2),
-            "date": hist.index[-1].strftime("%Y-%m-%d"),
-        }
-    else:
-        result["nasdaq"] = None
-
-    # 달러/원 환율
-    usdkrw = yf.Ticker(USD_KRW_TICKER)
-    hist_fx = usdkrw.history(period="5d")
-    if len(hist_fx) >= 2:
-        today_rate = hist_fx["Close"].iloc[-1]
-        prev_rate = hist_fx["Close"].iloc[-2]
-        change = today_rate - prev_rate
-        change_pct = (change / prev_rate) * 100
-        result["usdkrw"] = {
-            "value": round(today_rate, 2),
-            "change": round(change, 2),
-            "change_pct": round(change_pct, 2),
-            "date": hist_fx.index[-1].strftime("%Y-%m-%d"),
-        }
-    else:
-        result["usdkrw"] = None
-
-    return result
+    return {
+        "nasdaq": _fetch_ticker(NASDAQ_TICKER),
+        "usdkrw": _fetch_ticker(USD_KRW_TICKER),
+        "kospi": _fetch_ticker(KOSPI_TICKER),
+    }
 
 
 def fetch_interest_rate() -> dict | None:
