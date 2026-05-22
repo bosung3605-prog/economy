@@ -4,14 +4,13 @@ import requests
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-from fetchers import fetch_market_data, fetch_interest_rate, fetch_news
+from fetchers import fetch_market_data, fetch_interest_rate, fetch_kor_rate
 from report import (
     build_analysis,
     parse_analysis,
     build_hero_html,
     build_nasdaq_html,
     build_kospi_html,
-    build_news_html,
     build_telegram_message,
     render_html,
 )
@@ -36,37 +35,38 @@ def send_telegram(token: str, chat_id: str, text: str) -> None:
 
 
 def main() -> None:
-    groq_api_key = os.environ.get("GROQ_API_KEY", "")
-    telegram_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-    telegram_chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+    groq_api_key      = os.environ.get("GROQ_API_KEY", "")
+    telegram_token    = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    telegram_chat_id  = os.environ.get("TELEGRAM_CHAT_ID", "")
+    twelve_api_key    = os.environ.get("TWELVE_DATA_API_KEY", "")
+    bok_api_key       = os.environ.get("BOK_API_KEY", "")
 
     today = datetime.now(KST).strftime("%Y년 %m월 %d일")
     print(f"[{today}] 경제 브리핑 생성 시작")
 
-    print("시장 데이터 수집 중...")
-    market = fetch_market_data()
+    print("시장 데이터 수집 중 (Twelve Data)...")
+    market = fetch_market_data(twelve_api_key)
 
-    print("기준금리 수집 중...")
+    print("미국 기준금리 수집 중 (FRED)...")
     rate = fetch_interest_rate()
 
-    print("한국 경제 뉴스 수집 중...")
-    news_items = fetch_news(max_items=8)
+    print("한국 기준금리 수집 중 (ECOS)...")
+    kor_rate = fetch_kor_rate(bok_api_key)
 
-    print(f"[데이터 확인] market={market}, rate={rate}, news={len(news_items)}건")
+    print(f"[데이터 확인] market={market}, rate={rate}, kor_rate={kor_rate}")
 
     print("AI 해설 생성 중...")
     if groq_api_key:
-        raw_analysis = build_analysis(market, rate, news_items, groq_api_key)
+        raw_analysis = build_analysis(market, rate, kor_rate, groq_api_key)
         analysis = parse_analysis(raw_analysis)
     else:
         print("GROQ_API_KEY 미설정 — AI 해설 생략")
         analysis = {"usdkrw_reason": "", "rate_reason": "", "nasdaq_bullets": "", "korea_bullets": ""}
 
-    hero_html = build_hero_html(market, rate, analysis)
+    hero_html   = build_hero_html(market, rate, kor_rate, analysis)
     nasdaq_html = build_nasdaq_html(market, analysis)
-    kospi_html = build_kospi_html(market, analysis)
-    news_html = build_news_html(news_items)
-    html = render_html(today, hero_html, nasdaq_html, kospi_html, news_html)
+    kospi_html  = build_kospi_html(market, analysis)
+    html        = render_html(today, hero_html, nasdaq_html, kospi_html)
 
     DOCS_DIR.mkdir(exist_ok=True)
     html_path = DOCS_DIR / "index.html"
@@ -75,7 +75,7 @@ def main() -> None:
 
     if telegram_token and telegram_chat_id:
         print("텔레그램 메시지 발송 중...")
-        tg_text = build_telegram_message(today, market, rate, news_items, analysis)
+        tg_text = build_telegram_message(today, market, rate, kor_rate, analysis)
         send_telegram(telegram_token, telegram_chat_id, tg_text)
     else:
         print("텔레그램 환경 변수 미설정 — 발송 건너뜀")
