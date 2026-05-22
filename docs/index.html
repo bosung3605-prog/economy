@@ -10,27 +10,36 @@
          background: #f0f4f8; color: #1a202c; padding: 16px; }
   h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
   .subtitle { color: #718096; font-size: 0.85rem; margin-bottom: 20px; }
-  .card { background: #fff; border-radius: 12px; padding: 16px;
+  .card { background: #fff; border-radius: 12px; padding: 18px;
            margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-  .card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 12px;
-              color: #2d3748; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
-  .metric { display: flex; justify-content: space-between; align-items: center;
-             padding: 8px 0; border-bottom: 1px solid #f7fafc; }
-  .metric:last-child { border-bottom: none; }
-  .metric-label { font-size: 0.9rem; color: #4a5568; }
-  .metric-value { font-size: 1.1rem; font-weight: 700; }
-  .metric-change { font-size: 0.78rem; margin-left: 6px; }
-  .up { color: #e53e3e; }
-  .down { color: #3182ce; }
-  .flat { color: #718096; }
+  .card-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+                 letter-spacing: .06em; color: #a0aec0; margin-bottom: 14px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .hero-block { padding: 12px; background: #f7fafc; border-radius: 8px; }
+  .hero-label { font-size: 0.78rem; color: #718096; margin-bottom: 4px; }
+  .hero-number { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+  .hero-change { font-size: 0.82rem; margin-top: 4px; }
+  .reason { font-size: 0.87rem; line-height: 1.7; color: #2d3748;
+             background: #f7fafc; border-left: 3px solid #e2e8f0;
+             padding: 10px 12px; border-radius: 0 6px 6px 0; margin-top: 10px; }
+  .divider { height: 1px; background: #e2e8f0; margin: 14px 0; }
+  .big-metric { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .big-value { font-size: 1.9rem; font-weight: 800; }
+  .big-change { font-size: 0.85rem; }
+  .bullet-list { margin-top: 10px; padding-left: 0; list-style: none; }
+  .bullet-list li { font-size: 0.87rem; line-height: 1.7; color: #2d3748;
+                     padding: 5px 0; border-bottom: 1px solid #f0f4f8; }
+  .bullet-list li:last-child { border-bottom: none; }
+  .bullet-list li::before { content: "•"; color: #4a90d9; font-weight: 700;
+                              margin-right: 8px; }
   .news-item { padding: 8px 0; border-bottom: 1px solid #f7fafc; }
   .news-item:last-child { border-bottom: none; }
   .news-source { font-size: 0.72rem; color: #a0aec0; margin-bottom: 2px; }
   .news-title a { font-size: 0.88rem; color: #2b6cb0; text-decoration: none; line-height: 1.4; }
   .news-title a:hover { text-decoration: underline; }
-  .analysis { white-space: pre-line; font-size: 0.9rem; line-height: 1.7;
-               color: #2d3748; background: #f7fafc; border-radius: 8px;
-               padding: 12px; margin-top: 4px; }
+  .up { color: #e53e3e; }
+  .down { color: #3182ce; }
+  .flat { color: #718096; }
   .footer { text-align: center; font-size: 0.75rem; color: #a0aec0; margin-top: 16px; }
 </style>
 </head>
@@ -39,33 +48,25 @@
 <p class="subtitle">2026년 05월 22일 기준 · 매일 오전 7시 자동 업데이트</p>
 
 <div class="card">
-  <h2>시장 지표</h2>
-  <p>데이터를 불러올 수 없습니다.</p>
+  <div class="card-title">환율 &amp; 금리</div>
+  <div class="two-col"></div>
+  <div class="divider"></div><div class="reason"><strong>환율 변동 이유</strong><br>환율에 대한 구체적인 정보가 제공되지 않았기 때문에, 환율의 변동에 대한 구체적인 이유를 설명할 수 없습니다. 그러나 일반적으로 환율은 경제 지표, 수출 및 수입, 그리고 금리 등 다양한 요인에 의해 영향을 받습니다. 이러한 요인들이 어떻게 변화하는지에 따라 환율이 변동할 수 있습니다.</div><div class="reason" style="margin-top:8px;"><strong>금리 현황</strong><br>현재 금리 수준에 대한 정보가 제공되지 않았기 때문에, 구체적인 이유를 설명할 수 없습니다. 그러나 일반적으로 금리는 경제 성장, 인플레이션, 그리고 금융 정책 등에 의해 결정됩니다. 연준의 금리 결정은 경제 성장과 인플레이션을 조절하는 데 중요한 역할을 합니다.</div>
 </div>
+
+
 
 <div class="card">
-  <h2>오늘의 경제 뉴스</h2>
-  <div class="news-item"><div class="news-source">BBC Business</div><div class="news-title"><a href="https://www.bbc.com/news/articles/c4g85dryv24o?at_medium=RSS&at_campaign=rss" target="_blank">UK agrees £3.7bn trade deal with six Gulf states</a></div></div>
-<div class="news-item"><div class="news-source">BBC Business</div><div class="news-title"><a href="https://www.bbc.com/news/articles/c93xv27kpwxo?at_medium=RSS&at_campaign=rss" target="_blank">'Monitoring the situation': Why young men are drawn to prediction markets</a></div></div>
-<div class="news-item"><div class="news-source">BBC Business</div><div class="news-title"><a href="https://www.bbc.com/news/articles/c759x9pq3dpo?at_medium=RSS&at_campaign=rss" target="_blank">Nvidia's latest record earnings fail to impress investors</a></div></div>
-<div class="news-item"><div class="news-source">BBC Business</div><div class="news-title"><a href="https://www.bbc.com/news/articles/c0l2x5351n4o?at_medium=RSS&at_campaign=rss" target="_blank">Stop blaming young people for being unemployed, says Amazon's UK boss</a></div></div>
-<div class="news-item"><div class="news-source">BBC Business</div><div class="news-title"><a href="https://www.bbc.com/news/articles/cpqpygjwywjo?at_medium=RSS&at_campaign=rss" target="_blank">Prepare for half term queues at Dover due to EU border process, port says</a></div></div>
-<div class="news-item"><div class="news-source">BBC Business</div><div class="news-title"><a href="https://www.bbc.com/news/articles/cy42w782ejvo?at_medium=RSS&at_campaign=rss" target="_blank">Musk's SpaceX postpones Starship launch as mega share sale looms</a></div></div>
-<div class="news-item"><div class="news-source">BBC Business</div><div class="news-title"><a href="https://www.bbc.com/news/articles/cg4pew075xpo?at_medium=RSS&at_campaign=rss" target="_blank">Police to score train firms on tackling sexual harassment</a></div></div>
-<div class="news-item"><div class="news-source">BBC Business</div><div class="news-title"><a href="https://www.bbc.com/news/articles/cnvpme6811do?at_medium=RSS&at_campaign=rss" target="_blank">Love factually: Dating start-ups promise to cut the cheats</a></div></div>
+  <div class="card-title">오늘의 한국 경제 뉴스</div>
+  <div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12055238" target="_blank">“반도체 없었으면 어쩔 뻔”…역대급 증시에 소비심리 11개월만에 최대 반등</a></div></div>
+<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054770" target="_blank">국민연금, 국내주식 보유한도 5%P 높인다</a></div></div>
+<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054730" target="_blank">10대 기업, 전체 수출서 50% 차지</a></div></div>
+<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054727" target="_blank">석유 최고가격제 4연속 동결…유류세 인하 7월말까지 연장</a></div></div>
+<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054800" target="_blank">현대차, AI로 신차 기획 혁신</a></div></div>
+<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054755" target="_blank">국민연금 기계적 매도 부담 덜듯 … 정부 "체급 커진 만큼 더 담아야"</a></div></div>
+<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12054742" target="_blank">“가격 참 착하다” 젊은층 매수 몰린 동네 [n억집]</a></div></div>
+<div class="news-item"><div class="news-source">매일경제</div><div class="news-title"><a href="https://www.mk.co.kr/news/economy/12055580" target="_blank">iM뱅크–김창준 한미연구원, 지역기업 미국 진출 지원 업무협약</a></div></div>
 </div>
 
-<div class="card">
-  <h2>중학생도 이해하는 오늘의 해설</h2>
-  <div class="analysis">1. 오늘 시장 전체 분위기는 조금 복잡한 것 같아요. 영국이 걸프만 6개국과 3.7억 파운드의 무역 협정을 맺었는데, 이건 국제 무역에 좋은 영향을 줄 수 있어요. 하지만 Nvidia의最新 실적이 투자자들에게 큰 인상을 주지 못한 것처럼, 시장의 반응은 다양하네요.
-
-2. 오늘 나스닥의 데이터는 없어서 정확한 이유를 알 수 없지만, 일반적으로 나스닥은 기술 주식의 성과를 반영하는 지표입니다. 예를 들어, Nvidia의 실적이 좋지 않으면 나스닥에도 영향을 줄 수 있어요. 하지만 오늘은 데이터가 없으니, 다른 뉴스와 연결해서 설명하기는 어렵네요.
-
-3. 환율 변화는 우리 생활에 큰 영향을 미칠 수 있어요. 예를 들어, 원화가 약화하면 (원화가 다른 나라 화폐보다 가치가 떨어지는 것을 말해요) 해외 여행이나 수입품을 사는 데 더 많은 돈을 써야 해요. 반대로 원화가 강화하면 (원화가 다른 나라 화폐보다 가치가 올라가는 것을 말해요) 해외 여행이나 수입품을 사는 데 더 저렴해질 수 있어요.
-
-4. 기준금리는 지금 수준인 이유는 경제 상황과 관련이 있어요. 기준금리가 낮으면 (은행이 다른 은행에 돈을 빌려줄 때 적용하는 이자율을 말해요) 대출이 쉽고 돈이 많이 돌아다니게 되어 물가가 상승할 수 있어요. 앞으로 기준금리가 올라간다면, 대출이 어려워지고 돈이 적게 돌아다니게 되어 물가가 안정될 수 있어요.</div>
-</div>
-
-<p class="footer">데이터 출처: Yahoo Finance · FRED · Reuters · BBC | AI 해설: Groq (Llama 3.3)</p>
+<p class="footer">데이터: Yahoo Finance · FRED · 한국경제 · 매일경제 · 연합뉴스 | AI: Groq (Llama 3.3)</p>
 </body>
 </html>
