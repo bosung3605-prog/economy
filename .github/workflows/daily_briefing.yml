@@ -1,8 +1,9 @@
 name: 매일 아침 경제 브리핑
 
 on:
-  schedule:
-    - cron: '0 22 * * *'   # 22:00 UTC = 07:00 KST
+  # 자동 발송 일시 중지 — 재개 시 아래 schedule 3줄 주석 해제
+  # schedule:
+  #   - cron: '30 21 * * *'   # 21:30 UTC 트리거, 워크플로우에서 22:00 UTC(07:00 KST)까지 대기
   workflow_dispatch:         # 수동 실행 (테스트용)
 
 env:
@@ -20,6 +21,19 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 07:00 KST까지 대기 (cron 지연 보정)
+        if: github.event_name == 'schedule'
+        run: |
+          target=$(date -u -d "$(date -u +'%Y-%m-%d') 22:00:00" +%s)
+          now=$(date -u +%s)
+          if [ $now -lt $target ]; then
+            wait_sec=$((target - now))
+            echo "대기: ${wait_sec}초 후 07:00 KST 도달"
+            sleep $wait_sec
+          else
+            echo "이미 07:00 KST 지남, 즉시 진행"
+          fi
 
       - name: Python 3.11 설정
         uses: actions/setup-python@v5
